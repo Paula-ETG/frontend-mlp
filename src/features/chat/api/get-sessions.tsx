@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 
 import { api } from "@/libs/axios";
 import { type QueryConfig } from "@/libs/react-query";
@@ -39,7 +39,7 @@ export const useSessions = ({
   queryParams,
   queryConfig,
 }: UseSessionsOptions) => {
-  return useQuery({
+  return useSuspenseQuery({
     ...getSessionsQueryOptions(queryParams),
     ...queryConfig,
   });

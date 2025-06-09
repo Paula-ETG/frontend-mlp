@@ -2,9 +2,9 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { api } from "@/libs/axios";
 import { type QueryConfig } from "@/libs/react-query";
-import type { Session } from "@/types/api";
+import type { Assistant } from "@/types/api";
 
-export const getAssistants = (): Promise<Session[]> => {
+export const getAssistants = (): Promise<Assistant[]> => {
   return api.get(`/assistant`, {
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
