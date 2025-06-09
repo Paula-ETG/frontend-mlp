@@ -1,13 +1,13 @@
 import { Card } from "@/components/ui/card";
+import type { Messages } from "@/types/api";
 import { cn } from "@/utils/cn";
 
-export const ChatMessage = ({
-  isUser,
-  message,
-}: {
-  isUser: boolean;
-  message: string;
-}) => {
+export const ChatMessage = ({ message }: { message: Messages }) => {
+  const isUser = message.sender === "user";
+  const content = isUser
+    ? message.input?.content
+    : message.output?.content[0].text;
+
   return (
     <div
       className={cn(
@@ -29,7 +29,7 @@ export const ChatMessage = ({
               : "bg-gray-50 text-gray-900 border-gray-200"
           )}
         >
-          <p className="whitespace-pre-wrap">{message}</p>
+          <p className="whitespace-pre-wrap">{content}</p>
         </Card>
         {/* {timestamp && (
           <span className="text-xs text-gray-500 px-2">{timestamp}</span>

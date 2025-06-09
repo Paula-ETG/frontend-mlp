@@ -1,9 +1,25 @@
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { GalleryVerticalEnd } from "lucide-react";
 
-export const AccountDropdownMenuItem = ({ name }: { name: string }) => {
+// import { cva } from "class-variance-authority";
+// const variants = cva("", {
+//   variants: {
+//     selected: {
+//       true: "",
+//       false: "",
+//     }
+//   },
+// })
+
+export const AccountDropdownMenuItem = ({
+  name,
+  handleClick,
+}: {
+  name: string;
+  handleClick: () => void;
+}) => {
   return (
-    <DropdownMenuItem>
+    <DropdownMenuItem onClick={handleClick}>
       <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
         <GalleryVerticalEnd className="size-4" />
       </div>

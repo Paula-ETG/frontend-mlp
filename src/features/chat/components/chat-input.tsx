@@ -18,9 +18,9 @@ export const ChatInput = ({
           <textarea
             // ref={mergedRef}
             placeholder={placeholder}
-            className="w-full border-none pt-3 !pb-0 px-4 placeholder:text-muted-foreground focus-visible:ring-0 focus:outline-none resize-none mb-12"
+            className="w-full border-none pt-3 !pb-0 px-4 placeholder:text-muted-foreground focus-visible:ring-0 focus:outline-none resize-y mb-12"
             // value={input}
-            // onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             // onKeyDown={(e) => {
             //   if (e.key === "Enter" && !e.shiftKey) {
             //     e.preventDefault();
