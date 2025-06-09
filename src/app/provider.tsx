@@ -1,25 +1,22 @@
-import { useState } from 'react';
-import type React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { queryConfig } from '@/libs/react-query';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { queryConfig } from "@/libs/react-query";
+import { AuthLoader } from "@/libs/auth";
+import { AuthProvider } from "@/providers/auth";
+import { AppRouter } from "./router";
 
-interface AppProviderProps {
-  children: React.ReactNode;
-}
+const queryClient = new QueryClient({
+  defaultOptions: queryConfig,
+});
 
-export const AppProvider = ({ children }: AppProviderProps) => {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: queryConfig,
-      }),
-  );
-
+export const AppProvider = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools />
-      { children }
+      <AuthProvider>
+        <AuthLoader />
+        <AppRouter queryClient={queryClient} />
+      </AuthProvider>
     </QueryClientProvider>
-  )
-}
+  );
+};
