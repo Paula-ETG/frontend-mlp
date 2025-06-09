@@ -9,9 +9,9 @@ import {
 
 import journeyAILogoFull from "@/assets/logo/JourneyAI-Logo-Full.svg";
 
-export const LoginDialog = () => {
+export const LoginDialog = ({ toggleLogin }: { toggleLogin: boolean }) => {
   return (
-    <Dialog open={false}>
+    <Dialog open={toggleLogin}>
       <DialogContent className="w-sm max-w-sm" showCloseButton={false}>
         <DialogHeader className="text-center items-center">
           <img src={journeyAILogoFull} width={120} />
