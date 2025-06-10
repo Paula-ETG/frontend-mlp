@@ -13,6 +13,7 @@ import {
   useNavigate,
   type LoaderFunctionArgs,
 } from "react-router";
+import { useState } from "react";
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -43,6 +44,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GptModelSelectButton } from "@/features/chat/components/gpt-model-select-button";
 import { AccountDropdownMenuItem } from "@/features/chat/components/account-dropdown-menu-item";
 import { AccountSelectButton } from "@/features/chat/components/accounts-select-button";
+import { CreateAccountModal } from "@/features/chat/components/create-account-modal";
 import { useSessions } from "@/features/chat/api/get-sessions";
 import { useAccounts } from "@/features/chat/api/get-accounts";
 import {
@@ -62,8 +64,10 @@ const loader =
 
 const ChatSidebarHeader = ({
   handleAccountClick,
+  onCreateAccount,
 }: {
   handleAccountClick: (accountId: string) => void;
+  onCreateAccount: () => void;
 }) => {
   const { accountId } = useLoaderData() as Awaited<
     ReturnType<ReturnType<typeof loader>>
@@ -105,7 +109,15 @@ const ChatSidebarHeader = ({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {accountsDropdownOptions.map((item) => (
-            <DropdownMenuItem key={item.name} className="text-xs">
+            <DropdownMenuItem
+              key={item.name}
+              className="text-xs"
+              onClick={() => {
+                if (item.name === "Create Account") {
+                  onCreateAccount();
+                }
+              }}
+            >
               {item.name}
               <DropdownMenuShortcut>{item.icon}</DropdownMenuShortcut>
             </DropdownMenuItem>
@@ -244,6 +256,7 @@ const ChatLayout = () => {
   >;
   const user = useAuth();
   const navigate = useNavigate();
+  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 
   const { data: sessions } = useSessions({
     queryParams: {
@@ -259,12 +272,23 @@ const ChatLayout = () => {
     navigate(`/${accountId}/s/${sessionId}`);
   };
 
+  const handleCreateAccount = () => {
+    setShowCreateAccountModal(true);
+  };
+
+  const handleAccountCreated = (account: any) => {
+    navigate(`/${account.id}`);
+  };
+
   return (
     <>
       <SidebarProvider>
         <Sidebar>
           <SidebarHeader>
-            <ChatSidebarHeader handleAccountClick={handleAccountClick} />
+            <ChatSidebarHeader
+              handleAccountClick={handleAccountClick}
+              onCreateAccount={handleCreateAccount}
+            />
           </SidebarHeader>
           <SidebarContent>
             <ChatSidebarGeneralGroupContent accountId={accountId} />
@@ -285,6 +309,12 @@ const ChatLayout = () => {
           </div>
         </SidebarInset>
       </SidebarProvider>
+
+      <CreateAccountModal
+        isOpen={showCreateAccountModal}
+        onClose={() => setShowCreateAccountModal(false)}
+        onSuccess={handleAccountCreated}
+      />
     </>
   );
 };

@@ -13,7 +13,7 @@ import {
 } from "./routes/chat/chat-messages";
 import { ErrorPage } from "./routes/error";
 import { LoginPage } from "./routes/login";
-import { NoAccountsPage } from "./routes/no-accounts";
+import { DashboardPage } from "./routes/dashboard";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 
 const createAppRouter = (queryClient: QueryClient) =>
@@ -24,10 +24,10 @@ const createAppRouter = (queryClient: QueryClient) =>
       errorElement: <ErrorPage />,
     },
     {
-      path: "/no-accounts",
+      path: "/dashboard",
       element: (
         <ProtectedRoute>
-          <NoAccountsPage />
+          <DashboardPage />
         </ProtectedRoute>
       ),
       errorElement: <ErrorPage />,

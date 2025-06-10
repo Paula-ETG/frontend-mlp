@@ -12,23 +12,23 @@ export const LoginPage = () => {
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && user && accounts) {
+    if (isAuthenticated && user) {
       // Small delay to ensure the data is loaded
       const timer = setTimeout(() => {
         setShouldRedirect(true);
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, user, accounts]);
+  }, [isAuthenticated, user]);
 
-  // Redirect to first available account if user is authenticated
-  if (shouldRedirect && accounts && accounts.length > 0) {
-    return <Navigate to={`/${accounts[0].id}`} replace />;
-  }
-
-  // If authenticated but no accounts, redirect to a default route
-  if (shouldRedirect && (!accounts || accounts.length === 0)) {
-    return <Navigate to="/no-accounts" replace />;
+  // Redirect to dashboard after authentication
+  if (shouldRedirect) {
+    // If user has accounts, redirect to first account, otherwise to dashboard
+    if (accounts && accounts.length > 0) {
+      return <Navigate to={`/${accounts[0].id}`} replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return (
