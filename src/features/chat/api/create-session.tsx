@@ -10,17 +10,10 @@ export const createSessionInput = z.object({
   summary: z.string(),
 });
 
-export type CreateSessionData = z.infer<typeof createSessionInput> & {
-  assistant_id: string;
-  account_id: string;
-};
+export type CreateSessionData = z.infer<typeof createSessionInput>;
 
 export const createSessionApi = (data: CreateSessionData): Promise<Session> =>
-  api.post("/session", data, {
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-    },
-  });
+  api.post("/session", data);
 
 type UseCreateSessionMutationConfig = {
   mutationConfig?: MutationConfig<typeof createSessionApi>;
@@ -37,7 +30,7 @@ export const useCreateSession = ({
     mutationFn: createSessionApi,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({
-        queryKey: [],
+        queryKey: ["sessions"],
       });
       onSuccess?.(...args);
     },

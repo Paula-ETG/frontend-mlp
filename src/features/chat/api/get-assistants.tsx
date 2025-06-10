@@ -5,11 +5,7 @@ import { type QueryConfig } from "@/libs/react-query";
 import type { Assistant } from "@/types/api";
 
 export const getAssistants = (): Promise<Assistant[]> => {
-  return api.get(`/assistant`, {
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-    },
-  });
+  return api.get(`/assistant`);
 };
 
 export const getAssistantsQueryOptions = () => {
@@ -19,11 +15,11 @@ export const getAssistantsQueryOptions = () => {
   });
 };
 
-type UseSessionsOptions = {
+type UseAssistantsOptions = {
   queryConfig?: QueryConfig<typeof getAssistantsQueryOptions>;
 };
 
-export const useAssistants = ({ queryConfig }: UseSessionsOptions) => {
+export const useAssistants = ({ queryConfig }: UseAssistantsOptions) => {
   return useQuery({
     ...getAssistantsQueryOptions(),
     ...queryConfig,

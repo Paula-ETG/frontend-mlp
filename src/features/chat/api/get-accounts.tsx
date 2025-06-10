@@ -5,11 +5,7 @@ import { type QueryConfig } from "@/libs/react-query";
 import type { Account } from "@/types/api";
 
 export const getAccounts = (): Promise<Account[]> => {
-  return api.get(`/account`, {
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-    },
-  });
+  return api.get(`/account`);
 };
 
 export const getAccountsQueryOptions = () => {

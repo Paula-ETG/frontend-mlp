@@ -13,6 +13,7 @@ import {
   useNavigate,
   type LoaderFunctionArgs,
 } from "react-router";
+import { useState } from "react";
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -39,10 +40,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LoginDialog } from "@/features/login/components/login-dialog";
+
 import { GptModelSelectButton } from "@/features/chat/components/gpt-model-select-button";
 import { AccountDropdownMenuItem } from "@/features/chat/components/account-dropdown-menu-item";
 import { AccountSelectButton } from "@/features/chat/components/accounts-select-button";
+import { CreateAccountModal } from "@/features/chat/components/create-account-modal";
 import { useSessions } from "@/features/chat/api/get-sessions";
 import { useAccounts } from "@/features/chat/api/get-accounts";
 import {
@@ -62,8 +64,10 @@ const loader =
 
 const ChatSidebarHeader = ({
   handleAccountClick,
+  onCreateAccount,
 }: {
   handleAccountClick: (accountId: string) => void;
+  onCreateAccount: () => void;
 }) => {
   const { accountId } = useLoaderData() as Awaited<
     ReturnType<ReturnType<typeof loader>>
@@ -89,7 +93,7 @@ const ChatSidebarHeader = ({
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <AccountSelectButton accountName={account.name} />
+          <AccountSelectButton accountName={account?.name || ""} />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="dropdown-content-width-full">
@@ -105,7 +109,15 @@ const ChatSidebarHeader = ({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {accountsDropdownOptions.map((item) => (
-            <DropdownMenuItem key={item.name} className="text-xs">
+            <DropdownMenuItem
+              key={item.name}
+              className="text-xs"
+              onClick={() => {
+                if (item.name === "Create Account") {
+                  onCreateAccount();
+                }
+              }}
+            >
               {item.name}
               <DropdownMenuShortcut>{item.icon}</DropdownMenuShortcut>
             </DropdownMenuItem>
@@ -200,6 +212,8 @@ const Header = () => {
 };
 
 const ChatSidebarUserDropdown = () => {
+  const { user, logout } = useAuth();
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -211,15 +225,25 @@ const ChatSidebarUserDropdown = () => {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src="" alt="" />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {(
+                    user?.profile?.first_name?.[0] ||
+                    user?.email?.[0] ||
+                    "U"
+                  ).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">test</span>
+                <span className="truncate font-medium">
+                  {user?.profile?.first_name || user?.email || "User"}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="dropdown-content-width-full"></DropdownMenuContent>
+          <DropdownMenuContent className="dropdown-content-width-full">
+            <DropdownMenuItem onClick={logout}>Sign Out</DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
@@ -232,6 +256,7 @@ const ChatLayout = () => {
   >;
   const user = useAuth();
   const navigate = useNavigate();
+  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 
   const { data: sessions } = useSessions({
     queryParams: {
@@ -247,19 +272,29 @@ const ChatLayout = () => {
     navigate(`/${accountId}/s/${sessionId}`);
   };
 
+  const handleCreateAccount = () => {
+    setShowCreateAccountModal(true);
+  };
+
+  const handleAccountCreated = (account: any) => {
+    navigate(`/${account.id}`);
+  };
+
   return (
     <>
-      <LoginDialog toggleLogin={user === undefined} />
       <SidebarProvider>
         <Sidebar>
           <SidebarHeader>
-            <ChatSidebarHeader handleAccountClick={handleAccountClick} />
+            <ChatSidebarHeader
+              handleAccountClick={handleAccountClick}
+              onCreateAccount={handleCreateAccount}
+            />
           </SidebarHeader>
           <SidebarContent>
             <ChatSidebarGeneralGroupContent accountId={accountId} />
             <ChatSidebarSessionsGroupContent
               handleSessionClick={handleSessionClick}
-              sessionsData={sessions}
+              sessionsData={sessions || []}
             />
           </SidebarContent>
           <SidebarFooter>
@@ -274,6 +309,12 @@ const ChatLayout = () => {
           </div>
         </SidebarInset>
       </SidebarProvider>
+
+      <CreateAccountModal
+        isOpen={showCreateAccountModal}
+        onClose={() => setShowCreateAccountModal(false)}
+        onSuccess={handleAccountCreated}
+      />
     </>
   );
 };

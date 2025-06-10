@@ -1,4 +1,4 @@
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { api } from "@/libs/axios";
 import { type QueryConfig } from "@/libs/react-query";
@@ -15,16 +15,15 @@ export const getAccount = ({
     urlParams: {
       ":accountId": accountId,
     },
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-    },
   });
 };
 
-export const getAccountQueryOptions = (queryParams: UseAccountQueryParams) => {
+export const getAccountQueryOptions = ({
+  accountId,
+}: UseAccountQueryParams) => {
   return queryOptions({
-    queryKey: ["account", queryParams],
-    queryFn: () => getAccount(queryParams),
+    queryKey: ["accounts", accountId],
+    queryFn: () => getAccount({ accountId }),
   });
 };
 
@@ -34,7 +33,7 @@ type UseAccountOptions = {
 };
 
 export const useAccount = ({ queryParams, queryConfig }: UseAccountOptions) => {
-  return useSuspenseQuery({
+  return useQuery({
     ...getAccountQueryOptions(queryParams),
     ...queryConfig,
   });

@@ -9,30 +9,26 @@ import {
 } from "@/components/ui/form";
 import { useState } from "react";
 import { EyeIcon, EyeClosed } from "lucide-react";
-import { useLogin, loginInput, type LoginData } from "../api/login";
+import { useRegister, registerInput, type RegisterData } from "../api/register";
 import { resolveAxiosError } from "@/utils/resolve-error";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/use-user";
 
-interface LoginFormProps {
-  onSuccess?: (data: any) => void;
+interface RegisterFormProps {
+  onSuccess: (data: any) => void;
 }
 
-export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
+export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   );
-  const { setToken } = useAuth();
 
-  const loginMutation = useLogin({
+  const registerMutation = useRegister({
     mutationConfig: {
       onSuccess: (data) => {
-        console.log("Login successful:", data);
-        // Store the token in localStorage via auth context
-        setToken(data.access_token);
-        // Call external onSuccess if provided
-        onSuccess?.(data);
+        console.log("Registration successful:", data);
+        setErrorMessage(undefined);
+        onSuccess(data);
       },
       onError: (error) => {
         const errMessage = resolveAxiosError(error);
@@ -41,11 +37,8 @@ export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
     },
   });
 
-  const handleSubmit = (values: LoginData) => {
-    const formData = new FormData();
-    formData.append("username", values.username);
-    formData.append("password", values.password);
-    loginMutation.mutate(formData);
+  const handleSubmit = (values: RegisterData) => {
+    registerMutation.mutate(values);
   };
 
   return (
@@ -53,10 +46,10 @@ export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
       {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
       <Form
         onSubmit={handleSubmit}
-        schema={loginInput}
+        schema={registerInput}
         options={{
           defaultValues: {
-            username: "",
+            email: "",
             password: "",
           },
         }}
@@ -65,14 +58,15 @@ export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
           <>
             <FormField
               control={control}
-              name="username"
+              name="email"
               render={({ field, fieldState: { error } }) => (
                 <FormItem>
                   <FormControl>
                     <Input
-                      type="text"
-                      placeholder="Enter your username"
+                      type="email"
+                      placeholder="Enter your email"
                       {...field}
+                      disabled={registerMutation.isPending}
                     />
                   </FormControl>
                   {error?.message && (
@@ -91,7 +85,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
                   <FormControl>
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder="Create a password (min. 6 characters)"
                       endIcon={
                         showPassword ? (
                           <EyeClosed
@@ -106,6 +100,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
                         )
                       }
                       {...field}
+                      disabled={registerMutation.isPending}
                     />
                   </FormControl>
                   {error?.message && (
@@ -117,8 +112,10 @@ export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
               )}
             />
             <div className="grid">
-              <Button type="submit" disabled={loginMutation.isPending}>
-                {loginMutation.isPending ? "Signing In..." : "Sign In"}
+              <Button type="submit" disabled={registerMutation.isPending}>
+                {registerMutation.isPending
+                  ? "Creating Account..."
+                  : "Create Account"}
               </Button>
             </div>
           </>
