@@ -32,9 +32,9 @@ export const ChatMessages = () => {
 
   return (
     <div className="flex flex-col flex-1 overflow-auto">
-      {data.map((msg) => (
+      {/* {data.map((msg) => (
         <ChatMessage message={msg} key={msg.id} />
-      ))}
+      ))} */}
     </div>
   );
 };

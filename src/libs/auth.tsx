@@ -4,27 +4,33 @@ import type { User } from "@/types/api";
 import { useAuth } from "@/hooks/use-user";
 import { useEffect } from "react";
 
-const verifyUserAuth = (): Promise<User> => {
+const verifyUserAuth = (token: string): Promise<User> => {
   return api.get("/auth/me", {
     headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
-export const useUser = () =>
+export const useUser = (token: string | null) =>
   useQuery({
-    queryKey: ["user"],
-    queryFn: verifyUserAuth,
+    queryKey: ["user", token],
+    queryFn: () => verifyUserAuth(token!),
+    enabled: !!token,
   });
 
 export const AuthLoader = () => {
-  const { data } = useUser();
   const authUser = useAuth();
+  const { data, error } = useUser(authUser.token);
 
   useEffect(() => {
-    authUser.setUser(data);
-  }, [data, authUser]);
+    if (data) {
+      authUser.setUser(data);
+    } else if (error) {
+      // If token is invalid, clear it
+      authUser.logout();
+    }
+  }, [data, error, authUser]);
 
-  return undefined;
+  return null;
 };

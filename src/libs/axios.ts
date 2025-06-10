@@ -6,11 +6,19 @@ declare module "axios" {
   }
 }
 
+const TOKEN_KEY = "auth_token";
+
 export const api = Axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
 });
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  // Add authorization header if token exists
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
   if (!config.url) {
     return config;
   }

@@ -12,17 +12,21 @@ import { EyeIcon, EyeClosed } from "lucide-react";
 import { useLogin, loginInput, type LoginData } from "../api/login";
 import { resolveAxiosError } from "@/utils/resolve-error";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/use-user";
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   );
+  const { setToken } = useAuth();
 
   const loginMutation = useLogin({
     mutationConfig: {
       onSuccess: (data) => {
-        console.log(data);
+        console.log("Login successful:", data);
+        // Store the token in localStorage via auth context
+        setToken(data.access_token);
       },
       onError: (error) => {
         const errMessage = resolveAxiosError(error);
@@ -40,7 +44,7 @@ export const LoginForm = () => {
 
   return (
     <>
-      <p>{errorMessage}</p>
+      {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
       <Form
         onSubmit={handleSubmit}
         schema={loginInput}
@@ -107,7 +111,9 @@ export const LoginForm = () => {
               )}
             />
             <div className="grid">
-              <Button type="submit">Sign In</Button>
+              <Button type="submit" disabled={loginMutation.isPending}>
+                {loginMutation.isPending ? "Signing In..." : "Sign In"}
+              </Button>
             </div>
           </>
         )}

@@ -12,12 +12,33 @@ import {
   loader as chatMessagesLoader,
 } from "./routes/chat/chat-messages";
 import { ErrorPage } from "./routes/error";
+import { LoginPage } from "./routes/login";
+import { NoAccountsPage } from "./routes/no-accounts";
+import { ProtectedRoute } from "@/components/auth/protected-route";
 
 const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
     {
+      path: "/",
+      element: <LoginPage />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/no-accounts",
+      element: (
+        <ProtectedRoute>
+          <NoAccountsPage />
+        </ProtectedRoute>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
       path: "/:accountId",
-      element: <ChatLayout />,
+      element: (
+        <ProtectedRoute>
+          <ChatLayout />
+        </ProtectedRoute>
+      ),
       loader: chatLayoutLoader(queryClient),
       errorElement: <ErrorPage />,
       children: [

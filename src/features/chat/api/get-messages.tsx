@@ -1,4 +1,4 @@
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { api } from "@/libs/axios";
 import { type QueryConfig } from "@/libs/react-query";
@@ -18,18 +18,16 @@ export const getMessages = ({
       account_id: accountId,
       session_id: sessionId,
     },
-    headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_BEARER_TOKEN}`,
-    },
   });
 };
 
-export const getMessagesQueryOptions = (
-  queryParams: UseMessagesQueryParams
-) => {
+export const getMessagesQueryOptions = ({
+  sessionId,
+  accountId,
+}: UseMessagesQueryParams) => {
   return queryOptions({
-    queryKey: ["messages", queryParams],
-    queryFn: () => getMessages(queryParams),
+    queryKey: ["messages", accountId, sessionId],
+    queryFn: () => getMessages({ sessionId, accountId }),
   });
 };
 
@@ -42,7 +40,7 @@ export const useMessages = ({
   queryParams,
   queryConfig,
 }: UseMessagesOptions) => {
-  return useSuspenseQuery({
+  return useQuery({
     ...getMessagesQueryOptions(queryParams),
     ...queryConfig,
   });
