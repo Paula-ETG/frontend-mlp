@@ -1,4 +1,4 @@
-import { LoginDialog } from "@/features/login/components/login-dialog";
+import { AuthDialog } from "@/features/auth/components/auth-dialog";
 import { useAuth } from "@/hooks/use-user";
 import { Navigate } from "react-router";
 import { useEffect, useState } from "react";
@@ -33,7 +33,7 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <LoginDialog toggleLogin={true} />
+      <AuthDialog isOpen={true} />
     </div>
   );
 };
