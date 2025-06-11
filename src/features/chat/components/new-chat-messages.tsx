@@ -5,31 +5,28 @@ import { cn } from "@/utils/cn";
 type ChatMessageProp = {
   isUser: boolean;
   content?: string;
+  outputType?: "message" | string;
 };
 
 export const NewChatMessage = ({ isUser, content }: ChatMessageProp) => {
+  if (!content) return null;
+
   return (
     <div
-      className={cn(
-        "flex w-full gap-3 p-4",
-        isUser ? "justify-end" : "justify-start"
-      )}
+      className={cn("flex w-full", isUser ? "justify-end" : "justify-start")}
     >
-      <div
-        className={cn(
-          "flex flex-col space-y-2 max-w-[80%]",
-          isUser && "items-end"
-        )}
-      >
+      <div className="flex flex-col space-y-1 max-w-[80%]">
         <Card
           className={cn(
-            "px-4 py-3 text-sm",
+            "px-4 py-3 rounded-2xl shadow-sm text-sm",
             isUser
-              ? "bg-blue-500 text-white border-blue-500"
-              : "bg-gray-50 text-gray-900 border-gray-200"
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-white text-gray-900 border-gray-200"
           )}
         >
-          <p className="whitespace-pre-wrap">{content}</p>
+          <p className="text-sm whitespace-pre-wrap leading-relaxed">
+            {content}
+          </p>
         </Card>
         {/* {timestamp && (
           <span className="text-xs text-gray-500 px-2">{timestamp}</span>

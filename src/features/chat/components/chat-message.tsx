@@ -11,10 +11,12 @@ export const ChatMessage = ({ message }: { message: Messages }) => {
     if (!content) return null;
 
     return (
-      <div className="flex w-full gap-3 p-4 justify-end">
-        <div className="flex flex-col space-y-2 max-w-[80%] items-end">
-          <Card className="px-4 py-3 text-sm bg-blue-500 text-white border-blue-500">
-            <p className="whitespace-pre-wrap">{content}</p>
+      <div className="flex w-full justify-end">
+        <div className="flex flex-col space-y-1 max-w-[80%]">
+          <Card className="px-4 py-3 bg-blue-600 text-white border-blue-600 rounded-2xl shadow-sm">
+            <p className="text-sm whitespace-pre-wrap leading-relaxed">
+              {content}
+            </p>
           </Card>
         </div>
       </div>
@@ -38,10 +40,12 @@ export const ChatMessage = ({ message }: { message: Messages }) => {
   if (!content) return null;
 
   return (
-    <div className="flex w-full gap-3 p-4 justify-start">
-      <div className="flex flex-col space-y-2 max-w-[80%]">
-        <Card className="px-4 py-3 text-sm bg-gray-50 text-gray-900 border-gray-200">
-          <p className="whitespace-pre-wrap">{content}</p>
+    <div className="flex w-full justify-start">
+      <div className="flex flex-col space-y-1 max-w-[80%]">
+        <Card className="px-4 py-3 bg-white text-gray-900 border-gray-200 rounded-2xl shadow-sm">
+          <p className="text-sm whitespace-pre-wrap leading-relaxed">
+            {content}
+          </p>
         </Card>
       </div>
     </div>

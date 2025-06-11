@@ -26,7 +26,7 @@ interface LoadingDotsProps {
 
 export function LoadingDots({
   color = "currentColor",
-  size = 4,
+  size = 6,
   spacing = 4,
   duration = 1.5,
   className,
@@ -59,7 +59,7 @@ export function LoadingDots({
 
   return (
     <motion.div
-      className={cn("flex items-center justify-center", className)}
+      className={cn("flex items-center justify-start", className)}
       variants={containerVariants}
       initial="initial"
       animate="animate"

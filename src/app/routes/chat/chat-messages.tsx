@@ -18,7 +18,7 @@ import { ChatMessageStream } from "@/features/chat/components/chat-message-strea
 import { NewChatMessage } from "@/features/chat/components/new-chat-messages";
 
 import type { Events, EventType } from "@/types/api";
-import { Paperclip, SendHorizonal } from "lucide-react";
+import { Paperclip, Send, AtSign, Globe, Layers } from "lucide-react";
 import { useAuth } from "@/hooks/use-user";
 
 export const loader =
@@ -157,34 +157,36 @@ export const ChatMessages = () => {
         },
       })
     );
-
-    // Reset the form
-    formHelpers.reset({ content: "" });
   };
 
   return (
-    <>
-      <div className="flex flex-col flex-1 overflow-auto">
-        {data?.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
-        ))}
-        {newMessages &&
-          newMessages?.map((msg, index) => (
-            <NewChatMessage
-              key={`${msg.content}-${index}`}
-              isUser={msg.isUser}
-              content={msg.content}
-            />
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-auto px-4 py-6">
+        <div className="max-w-4xl mx-auto space-y-4">
+          {data?.map((msg) => (
+            <ChatMessage key={msg.id} message={msg} />
           ))}
-        <ChatMessageStream
-          event={event}
-          eventType={eventType}
-          tokenStream={tokenStream}
-        />
-        <div ref={messagesEndRef} />
+          {newMessages &&
+            newMessages?.map((msg, index) => (
+              <NewChatMessage
+                key={`${msg.content}-${index}`}
+                isUser={msg.isUser}
+                content={msg.content}
+              />
+            ))}
+          <ChatMessageStream
+            event={event}
+            eventType={eventType}
+            tokenStream={tokenStream}
+          />
+          <div ref={messagesEndRef} />
+        </div>
       </div>
-      <div className="bg-white px-4 pb-4 sticky bottom-0 flex flex-col w-full text-center">
-        <div className="w-full max-w-[800px] mx-auto">
+
+      {/* Chat Input Area */}
+      <div className="border-t bg-white px-4 py-6">
+        <div className="max-w-4xl mx-auto">
           <Form
             onSubmit={handleSendMessage}
             schema={chatInputSchema}
@@ -194,18 +196,19 @@ export const ChatMessages = () => {
               },
             }}
           >
-            {({ control, reset, formState }) => (
-              <div className="relative bg-background border rounded-lg overflow-hidden shadow-sm">
+            {({ control, reset, formState, setValue }) => (
+              <div className="relative">
                 <FormField
                   control={control}
                   name="content"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <div className="relative bg-background border rounded-lg overflow-hidden shadow-sm">
+                        <div className="relative">
                           <textarea
-                            className="w-full border-none pt-3 !pb-0 px-4 placeholder:text-muted-foreground focus-visible:ring-0 focus:outline-none resize-none mb-12"
-                            placeholder="Ask JourneyAI"
+                            className="w-full resize-none rounded-2xl border border-gray-200 px-4 py-3 pb-12 placeholder:text-gray-500 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-sm min-h-[52px] max-h-32"
+                            placeholder="Ask Journey AI or type @ to use an AI Extension"
+                            rows={1}
                             {...field}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" && !e.shiftKey) {
@@ -221,32 +224,83 @@ export const ChatMessages = () => {
                                 }
                               }
                             }}
+                            onInput={(e) => {
+                              const target = e.target as HTMLTextAreaElement;
+                              target.style.height = "auto";
+                              target.style.height =
+                                Math.min(target.scrollHeight, 128) + "px";
+                            }}
                           />
-                          <div className="absolute bottom-0 left-0 right-0 flex border-none items-center px-2 py-1 pb-2 border-t">
-                            <div className="flex flex-wrap gap-1">
+
+                          {/* Action Buttons */}
+                          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                            <div className="flex items-center gap-1">
                               <Button
                                 type="button"
                                 size="sm"
                                 variant="ghost"
-                                className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground flex-shrink-0 p-0"
+                                className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-0"
                               >
-                                <Paperclip size={14} />
+                                <Paperclip size={16} />
                                 <span className="sr-only">Add attachment</span>
                               </Button>
+
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-0"
+                              >
+                                <Globe size={16} />
+                                <span className="sr-only">Web search</span>
+                              </Button>
+
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-0"
+                              >
+                                <AtSign size={16} />
+                                <span className="sr-only">AI Extension</span>
+                              </Button>
+
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-0"
+                              >
+                                <Layers size={16} />
+                                <span className="sr-only">Templates</span>
+                              </Button>
                             </div>
-                            <div className="ml-auto">
+
+                            <div className="flex items-center">
                               <Button
                                 type="submit"
-                                variant="default"
-                                size="icon"
+                                size="sm"
                                 disabled={
                                   !field.value?.trim() ||
                                   event === "processing_session" ||
                                   event === "agent_response"
                                 }
-                                className="h-8 w-8 rounded-full flex-shrink-0 p-1"
+                                className="h-8 w-8 rounded-lg bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 p-0"
+                                onClick={() => {
+                                  // Clear form after submission
+                                  setTimeout(() => {
+                                    setValue("content", "");
+                                    reset({ content: "" });
+                                    // Also reset textarea height
+                                    const textarea =
+                                      document.querySelector("textarea");
+                                    if (textarea) {
+                                      textarea.style.height = "auto";
+                                    }
+                                  }, 0);
+                                }}
                               >
-                                <SendHorizonal size={14} />
+                                <Send size={16} className="text-white" />
                                 <span className="sr-only">Send message</span>
                               </Button>
                             </div>
@@ -259,11 +313,13 @@ export const ChatMessages = () => {
               </div>
             )}
           </Form>
+
+          {/* Footer Text */}
+          <p className="text-center text-xs text-gray-500 mt-3">
+            Journey AI can make mistakes. Check important info.
+          </p>
         </div>
-        <p className="text-sm text-gray-500">
-          Journey AI can make mistakes. Check important info.
-        </p>
       </div>
-    </>
+    </div>
   );
 };
