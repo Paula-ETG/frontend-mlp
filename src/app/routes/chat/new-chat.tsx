@@ -18,8 +18,8 @@ export const NewChat = () => {
 
   const handleClick = (id: string) => {
     createSession.mutate({
-      title: "test1",
-      summary: "test1",
+      title: "New Session",
+      summary: "",
       account_id: accountId!,
       assistant_id: id,
     });
