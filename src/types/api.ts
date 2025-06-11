@@ -5,6 +5,13 @@ export type Base = {
 
 export type SenderType = "assistant" | "user";
 
+export type EventType = "agent_switch" | "done" | "token";
+
+export type Events =
+  | "processing_session"
+  | "agent_response"
+  | "connection_established";
+
 export type User = {
   email: string;
   id: string;
