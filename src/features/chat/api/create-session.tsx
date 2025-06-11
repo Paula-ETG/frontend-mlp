@@ -10,7 +10,10 @@ export const createSessionInput = z.object({
   summary: z.string(),
 });
 
-export type CreateSessionData = z.infer<typeof createSessionInput>;
+export type CreateSessionData = z.infer<typeof createSessionInput> & {
+  account_id: string;
+  assistant_id: string;
+};
 
 export const createSessionApi = (data: CreateSessionData): Promise<Session> =>
   api.post("/session", data);

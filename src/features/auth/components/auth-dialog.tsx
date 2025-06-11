@@ -24,10 +24,13 @@ export const AuthDialog = ({ isOpen }: AuthDialogProps) => {
   const [registrationToken, setRegistrationToken] = useState<string | null>(
     null
   );
+  const [registrationApiKey, setRegistrationApiKey] = useState<string | null>(
+    null
+  );
   const { setToken, setUser } = useAuth();
 
   const handleLoginSuccess = (data: any) => {
-    setToken(data.access_token);
+    setToken(data.access_token, data.api_key);
     // Login flow is complete, AuthLoader will handle user data
   };
 
@@ -35,13 +38,14 @@ export const AuthDialog = ({ isOpen }: AuthDialogProps) => {
     // Store the token temporarily but DON'T set it in auth context yet
     // This prevents AuthLoader from triggering and causing redirects
     setRegistrationToken(data.access_token);
+    setRegistrationApiKey(data.api_key);
     setCurrentStep("profile-setup");
   };
 
   const handleProfileSetupSuccess = (userData: any) => {
     // Now that profile is complete, set both token and user data
-    if (registrationToken) {
-      setToken(registrationToken);
+    if (registrationToken && registrationApiKey) {
+      setToken(registrationToken, registrationApiKey);
     }
     setUser(userData);
     setRegistrationToken(null);

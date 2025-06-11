@@ -30,7 +30,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps = {}) => {
       onSuccess: (data) => {
         console.log("Login successful:", data);
         // Store the token in localStorage via auth context
-        setToken(data.access_token);
+        setToken(data.access_token, data.api_key);
         // Call external onSuccess if provided
         onSuccess?.(data);
       },
