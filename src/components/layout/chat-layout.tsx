@@ -197,7 +197,7 @@ export const ChatSidebarSessionsGroupContent = ({
 
 const Header = () => {
   return (
-    <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 px-4 z-50">
+    <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 px-4 z-50 bg-gray-50">
       <SidebarTrigger />
       <div>
         <DropdownMenu>
@@ -302,9 +302,9 @@ const ChatLayout = () => {
             <ChatSidebarUserDropdown />
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset>
+        <SidebarInset className="bg-gray-50">
           <Header />
-          <div className="flex flex-1 flex-col gap-4">
+          <div className="flex flex-1 flex-col gap-4 bg-gray-50">
             <Outlet />
           </div>
         </SidebarInset>
