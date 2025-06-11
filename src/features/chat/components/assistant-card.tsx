@@ -1,4 +1,19 @@
 import { Card, CardAction, CardContent } from "@/components/ui/card";
+import { TrendingUp, Users, Presentation, Sparkles } from "lucide-react";
+
+const getIconForAssistant = (title: string) => {
+  const titleLower = title.toLowerCase();
+  if (titleLower.includes("lead") || titleLower.includes("generation")) {
+    return TrendingUp;
+  }
+  if (titleLower.includes("client") || titleLower.includes("outreach")) {
+    return Users;
+  }
+  if (titleLower.includes("sales") || titleLower.includes("pitch")) {
+    return Presentation;
+  }
+  return Sparkles;
+};
 
 export const AssistantCard = ({
   id,
@@ -11,14 +26,21 @@ export const AssistantCard = ({
   description?: string;
   handleClick: (id: string) => void;
 }) => {
+  const IconComponent = getIconForAssistant(title);
+
   return (
-    <Card className="bg-transparent hover:bg-muted/50 md:max-w-96 sm:max-w-96 py-4 px-3 hover:cursor-pointer">
+    <Card className="bg-white hover:bg-gray-50 border border-gray-200 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-md hover:cursor-pointer">
       <CardAction onClick={() => handleClick(id)}>
-        <CardContent className="px-3">
-          <div className="flex flex-row items-center gap-2">
-            <div className="flex flex-col text-left gap-1">
-              <p className="text-2xl font-mabry-pro-bold">{title}</p>
-              <p className="text-gray-600">{description}</p>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-start gap-4">
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+              <IconComponent className="w-6 h-6 text-gray-600" />
+            </div>
+            <div className="flex flex-col text-left gap-2">
+              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {description}
+              </p>
             </div>
           </div>
         </CardContent>
