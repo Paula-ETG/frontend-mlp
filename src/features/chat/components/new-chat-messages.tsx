@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
 // import type { Messages } from "@/types/api";
 import { cn } from "@/utils/cn";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type ChatMessageProp = {
   isUser: boolean;
@@ -24,9 +26,17 @@ export const NewChatMessage = ({ isUser, content }: ChatMessageProp) => {
               : "bg-white text-gray-900 border-gray-200"
           )}
         >
-          <p className="text-sm whitespace-pre-wrap leading-relaxed">
-            {content}
-          </p>
+          {isUser ? (
+            <p className="text-sm whitespace-pre-wrap leading-relaxed">
+              {content}
+            </p>
+          ) : (
+            <div className="markdown-content">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
+            </div>
+          )}
         </Card>
         {/* {timestamp && (
           <span className="text-xs text-gray-500 px-2">{timestamp}</span>

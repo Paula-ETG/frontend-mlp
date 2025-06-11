@@ -19,7 +19,7 @@ import { NewChatMessage } from "@/features/chat/components/new-chat-messages";
 
 import type { Events, EventType } from "@/types/api";
 import { Paperclip, Send, AtSign, Globe, Layers } from "lucide-react";
-// import { useAuth } from "@/hooks/use-user";
+import { useAuth } from "@/hooks/use-user";
 
 export const loader =
   (queryClient: QueryClient) =>
@@ -49,7 +49,7 @@ export const ChatMessages = () => {
     ReturnType<ReturnType<typeof loader>>
   >;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  // const auth = useAuth();
+  const auth = useAuth();
   const queryClient = useQueryClient();
   const [event, setEvent] = useState<Events | "idle">("idle");
   const [eventType, setEventType] = useState<EventType | undefined>(undefined);
@@ -86,7 +86,7 @@ export const ChatMessages = () => {
   // Auto-scroll on new message or token stream
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [newMessages]);
+  }, [newMessages, tokenStream]);
 
   // Typing effect stream handler
   useEffect(() => {
@@ -128,13 +128,12 @@ export const ChatMessages = () => {
   }, [lastMessage, accountId, sessionId, queryClient]);
 
   // Send message to websocket
-  const handleSendMessage = (
-    data: ChatInputType
-    // formHelpers: any
-  ) => {
+  const handleSendMessage = (data: ChatInputType, formMethods: any) => {
     const messageContent = data.content?.trim();
 
     if (!messageContent) return;
+
+    console.log("handleSendMessage called with:", { data, formMethods });
 
     // Add user message to new messages immediately for immediate UI feedback
     const userMessage = {
@@ -160,6 +159,37 @@ export const ChatMessages = () => {
         },
       })
     );
+
+    // Clear the form immediately - try multiple approaches
+    console.log("Attempting to clear form...");
+    try {
+      if (formMethods?.setValue) {
+        console.log("Using formMethods.setValue");
+        formMethods.setValue("content", "");
+      }
+      if (formMethods?.reset) {
+        console.log("Using formMethods.reset");
+        formMethods.reset({ content: "" });
+      }
+    } catch (error) {
+      console.log("Form methods not available:", error);
+    }
+
+    // Also directly clear the textarea as a fallback
+    setTimeout(() => {
+      console.log("Direct DOM manipulation fallback");
+      const textarea = document.querySelector(
+        'textarea[name="content"]'
+      ) as HTMLTextAreaElement;
+      console.log("Found textarea:", textarea);
+      if (textarea) {
+        console.log("Clearing textarea value and height");
+        textarea.value = "";
+        textarea.style.height = "auto";
+        // Trigger input event to update React state
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }, 0);
   };
 
   return (
@@ -290,8 +320,12 @@ export const ChatMessages = () => {
                                 }
                                 className="h-8 w-8 rounded-lg bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 p-0"
                                 onClick={() => {
+                                  console.log("Submit button clicked!");
                                   // Clear form after submission
                                   setTimeout(() => {
+                                    console.log(
+                                      "Button onClick timeout - clearing form"
+                                    );
                                     setValue("content", "");
                                     reset({ content: "" });
                                     // Also reset textarea height

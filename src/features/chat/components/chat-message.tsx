@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
 import type { Messages } from "@/types/api";
-// import { cn } from "@/utils/cn";
+import { cn } from "@/utils/cn";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export const ChatMessage = ({ message }: { message: Messages }) => {
   const isUser = message.sender === "user";
@@ -43,9 +45,9 @@ export const ChatMessage = ({ message }: { message: Messages }) => {
     <div className="flex w-full justify-start">
       <div className="flex flex-col space-y-1 max-w-[80%]">
         <Card className="px-4 py-3 bg-white text-gray-900 border-gray-200 rounded-2xl shadow-sm">
-          <p className="text-sm whitespace-pre-wrap leading-relaxed">
-            {content}
-          </p>
+          <div className="markdown-content">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          </div>
         </Card>
       </div>
     </div>
