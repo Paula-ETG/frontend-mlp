@@ -6,7 +6,7 @@ declare module "axios" {
   }
 }
 
-const TOKEN_KEY = "auth_token";
+const TOKEN_KEY = "journey_ai_access_token";
 
 export const api = Axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
