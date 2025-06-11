@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import type { Messages } from "@/types/api";
-import { cn } from "@/utils/cn";
+// import { cn } from "@/utils/cn";
 
 export const ChatMessage = ({ message }: { message: Messages }) => {
   const isUser = message.sender === "user";

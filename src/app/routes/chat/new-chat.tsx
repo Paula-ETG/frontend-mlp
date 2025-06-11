@@ -26,7 +26,7 @@ export const NewChat = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 overflow-auto justify-center px-4 items-center">
+    <div className="flex flex-col flex-1 overflow-auto mt-20 px-4 items-center">
       <h1 className="text-5xl font-mabry-pro-bold">Hi! I'm Journey AI</h1>
       <h1 className="text-2xl font-mabry-pro-regular sm:text-center max-w-3xl">
         Your AI-powered assistant for automating sales tasks, enriching leads,

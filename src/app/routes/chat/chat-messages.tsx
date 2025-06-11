@@ -19,7 +19,7 @@ import { NewChatMessage } from "@/features/chat/components/new-chat-messages";
 
 import type { Events, EventType } from "@/types/api";
 import { Paperclip, Send, AtSign, Globe, Layers } from "lucide-react";
-import { useAuth } from "@/hooks/use-user";
+// import { useAuth } from "@/hooks/use-user";
 
 export const loader =
   (queryClient: QueryClient) =>
@@ -49,7 +49,7 @@ export const ChatMessages = () => {
     ReturnType<ReturnType<typeof loader>>
   >;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const auth = useAuth();
+  // const auth = useAuth();
   const queryClient = useQueryClient();
   const [event, setEvent] = useState<Events | "idle">("idle");
   const [eventType, setEventType] = useState<EventType | undefined>(undefined);
@@ -86,7 +86,7 @@ export const ChatMessages = () => {
   // Auto-scroll on new message or token stream
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [newMessages, tokenStream]);
+  }, [newMessages]);
 
   // Typing effect stream handler
   useEffect(() => {
@@ -128,7 +128,10 @@ export const ChatMessages = () => {
   }, [lastMessage, accountId, sessionId, queryClient]);
 
   // Send message to websocket
-  const handleSendMessage = (data: ChatInputType, formHelpers: any) => {
+  const handleSendMessage = (
+    data: ChatInputType
+    // formHelpers: any
+  ) => {
     const messageContent = data.content?.trim();
 
     if (!messageContent) return;
@@ -185,7 +188,7 @@ export const ChatMessages = () => {
       </div>
 
       {/* Chat Input Area */}
-      <div className="border-t bg-white px-4 py-6">
+      <div className="border-t sticky bottom-0 bg-white px-4 py-6">
         <div className="max-w-4xl mx-auto">
           <Form
             onSubmit={handleSendMessage}
@@ -196,7 +199,7 @@ export const ChatMessages = () => {
               },
             }}
           >
-            {({ control, reset, formState, setValue }) => (
+            {({ control, reset, setValue }) => (
               <div className="relative">
                 <FormField
                   control={control}

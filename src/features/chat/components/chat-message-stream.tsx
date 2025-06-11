@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 
 export const ChatMessageStream = ({
   event,
-  eventType,
+  // eventType,
   tokenStream,
 }: {
   event: Events | "idle";
