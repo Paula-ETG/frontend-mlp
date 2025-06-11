@@ -254,7 +254,7 @@ const ChatLayout = () => {
   const { accountId } = useLoaderData() as Awaited<
     ReturnType<ReturnType<typeof loader>>
   >;
-  const user = useAuth();
+  // const user = useAuth();
   const navigate = useNavigate();
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 
