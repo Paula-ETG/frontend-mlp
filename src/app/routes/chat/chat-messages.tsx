@@ -166,7 +166,7 @@ export const ChatMessages = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full">
       {/* Messages Area */}
       <div className="flex-1 overflow-auto px-4 py-6">
         <div className="max-w-4xl mx-auto space-y-4">
@@ -187,7 +187,7 @@ export const ChatMessages = () => {
       </div>
 
       {/* Chat Input Area */}
-      <div className="border-t sticky bottom-0 bg-white px-4 py-6">
+      <div className="sticky bottom-0 bg-white px-4 py-6">
         <div className="max-w-4xl mx-auto">
           <Form
             onSubmit={handleSendMessage}
