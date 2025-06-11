@@ -154,3 +154,13 @@
     max-height: var(--radix-dropdown-menu-content-available-height);
   }
 }
+
+/* Chat streaming cursor animation */
+@keyframes text-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.animate-text-cursor {
+  animation: text-cursor 1s infinite;
+}

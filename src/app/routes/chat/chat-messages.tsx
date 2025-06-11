@@ -3,6 +3,7 @@ import { z } from "zod";
 import useWebsocket from "react-use-websocket";
 import type { QueryClient } from "@tanstack/react-query";
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { ChatMessage } from "@/features/chat/components/chat-message";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export const loader =
   };
 
 const chatInputSchema = z.object({
-  content: z.string().optional(),
+  content: z.string().min(1, "Message cannot be empty"),
 });
 type ChatInputType = z.infer<typeof chatInputSchema>;
 
@@ -49,6 +50,7 @@ export const ChatMessages = () => {
   >;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const auth = useAuth();
+  const queryClient = useQueryClient();
   const [event, setEvent] = useState<Events | "idle">("idle");
   const [eventType, setEventType] = useState<EventType | undefined>(undefined);
   const [tokenStream, setTokenStream] = useState("");
@@ -73,75 +75,91 @@ export const ChatMessages = () => {
     },
   });
 
+  // Clear new messages when refetching or when session changes
   useEffect(() => {
     setNewMessages([]);
-  }, [isRefetching]);
+    setTokenStream("");
+    setEvent("idle");
+    setEventType(undefined);
+  }, [sessionId, isRefetching]);
 
   // Auto-scroll on new message or token stream
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [newMessages]);
+  }, [newMessages, tokenStream]);
 
   // Typing effect stream handler
   useEffect(() => {
     if (!lastMessage?.data) return;
 
-    const parsedLastMessage = JSON.parse(lastMessage.data);
-    const delta = parsedLastMessage.data?.delta;
-    const type = parsedLastMessage.data?.type;
+    try {
+      const parsedLastMessage = JSON.parse(lastMessage.data);
+      const delta = parsedLastMessage.data?.delta;
+      const type = parsedLastMessage.data?.type;
 
-    if (parsedLastMessage.event) {
-      setEvent(parsedLastMessage.event);
-      setEventType(type);
-    }
-
-    if (delta) {
-      setTokenStream((prev) => prev + delta);
-    }
-
-    // Final message complete — add to message list
-    if (type === "message") {
-      const contentObj = parsedLastMessage.data.content.find(
-        (c: any) => c.type === "output_text"
-      );
-
-      if (contentObj) {
-        setNewMessages((prev) => [
-          ...prev,
-          {
-            isUser: false,
-            content: contentObj.text,
-            outputType: "message",
-          },
-        ]);
+      if (parsedLastMessage.event) {
+        setEvent(parsedLastMessage.event);
+        setEventType(type);
       }
 
-      setTokenStream("");
+      // Handle token streaming for agent responses
+      if (delta && parsedLastMessage.event === "agent_response") {
+        setTokenStream((prev) => prev + delta);
+      }
+
+      // Final message complete — invalidate query to refetch messages
+      if (type === "message" && parsedLastMessage.event === "agent_response") {
+        // Clear the streaming state
+        setTokenStream("");
+        setEvent("idle");
+        setEventType(undefined);
+
+        // Clear new messages since they'll be fetched from server
+        setNewMessages([]);
+
+        // Invalidate the messages query to refetch from server
+        queryClient.invalidateQueries({
+          queryKey: ["messages", accountId, sessionId],
+        });
+      }
+    } catch (error) {
+      console.error("Error parsing websocket message:", error);
     }
-  }, [lastMessage]);
+  }, [lastMessage, accountId, sessionId, queryClient]);
 
   // Send message to websocket
-  const handleSendMessage = (data: ChatInputType) => {
-    if (data.content) {
-      setEvent("processing_session");
-      newMessages.push({
-        isUser: true,
-        content: data.content,
-        outputType: "message",
-      });
-      setNewMessages(newMessages);
-    }
+  const handleSendMessage = (data: ChatInputType, formHelpers: any) => {
+    const messageContent = data.content?.trim();
 
+    if (!messageContent) return;
+
+    // Add user message to new messages immediately for immediate UI feedback
+    const userMessage = {
+      isUser: true,
+      content: messageContent,
+      outputType: "message" as const,
+    };
+
+    setNewMessages((prev) => [...prev, userMessage]);
+
+    // Set processing state
+    setEvent("processing_session");
+    setEventType(undefined);
+    setTokenStream("");
+
+    // Send message via websocket
     sendMessage(
       JSON.stringify({
         event: "ingest_message",
         data: {
-          // attachments: [],
-          content: data.content?.trim(),
+          content: messageContent,
           session_id: sessionId,
         },
       })
     );
+
+    // Reset the form
+    formHelpers.reset({ content: "" });
   };
 
   return (
@@ -151,9 +169,9 @@ export const ChatMessages = () => {
           <ChatMessage key={msg.id} message={msg} />
         ))}
         {newMessages &&
-          newMessages?.map((msg) => (
+          newMessages?.map((msg, index) => (
             <NewChatMessage
-              key={msg.content}
+              key={`${msg.content}-${index}`}
               isUser={msg.isUser}
               content={msg.content}
             />
@@ -166,7 +184,6 @@ export const ChatMessages = () => {
         <div ref={messagesEndRef} />
       </div>
       <div className="bg-white px-4 pb-4 sticky bottom-0 flex flex-col w-full text-center">
-        {/* <ChatInput placeholder="Ask Journey AI" /> */}
         <div className="w-full max-w-[800px] mx-auto">
           <Form
             onSubmit={handleSendMessage}
@@ -177,7 +194,7 @@ export const ChatMessages = () => {
               },
             }}
           >
-            {({ control, resetField }) => (
+            {({ control, reset, formState }) => (
               <div className="relative bg-background border rounded-lg overflow-hidden shadow-sm">
                 <FormField
                   control={control}
@@ -190,11 +207,22 @@ export const ChatMessages = () => {
                             className="w-full border-none pt-3 !pb-0 px-4 placeholder:text-muted-foreground focus-visible:ring-0 focus:outline-none resize-none mb-12"
                             placeholder="Ask JourneyAI"
                             {...field}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                const form = e.currentTarget.form;
+                                if (form) {
+                                  form.dispatchEvent(
+                                    new Event("submit", {
+                                      cancelable: true,
+                                      bubbles: true,
+                                    })
+                                  );
+                                }
+                              }
+                            }}
                           />
-                          <div
-                            // ref={toolbarRef}
-                            className="absolute bottom-0 left-0 right-0 flex border-none items-center px-2 py-1 pb-2 border-t"
-                          >
+                          <div className="absolute bottom-0 left-0 right-0 flex border-none items-center px-2 py-1 pb-2 border-t">
                             <div className="flex flex-wrap gap-1">
                               <Button
                                 type="button"
@@ -211,10 +239,12 @@ export const ChatMessages = () => {
                                 type="submit"
                                 variant="default"
                                 size="icon"
-                                onClick={() => resetField("content")}
-                                className={
-                                  "h-8 w-8 rounded-full flex-shrink-0 p-1"
+                                disabled={
+                                  !field.value?.trim() ||
+                                  event === "processing_session" ||
+                                  event === "agent_response"
                                 }
+                                className="h-8 w-8 rounded-full flex-shrink-0 p-1"
                               >
                                 <SendHorizonal size={14} />
                                 <span className="sr-only">Send message</span>
