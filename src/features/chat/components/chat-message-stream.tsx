@@ -1,4 +1,4 @@
-import type { Events, EventType } from "@/types/api";
+import type { Events } from "@/types/api";
 import { LoadingDots } from "./loading";
 import { Card } from "@/components/ui/card";
 import ReactMarkdown from "react-markdown";
@@ -6,11 +6,9 @@ import remarkGfm from "remark-gfm";
 
 export const ChatMessageStream = ({
   event,
-  eventType,
   tokenStream,
 }: {
   event: Events | "idle";
-  eventType?: EventType;
   tokenStream?: string;
 }) => {
   if (event === "processing_session") {

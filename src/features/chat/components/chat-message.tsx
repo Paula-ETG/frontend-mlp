@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import type { Messages } from "@/types/api";
-import { cn } from "@/utils/cn";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 

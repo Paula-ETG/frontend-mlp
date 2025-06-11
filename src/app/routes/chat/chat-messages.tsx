@@ -17,9 +17,8 @@ import {
 import { ChatMessageStream } from "@/features/chat/components/chat-message-stream";
 import { NewChatMessage } from "@/features/chat/components/new-chat-messages";
 
-import type { Events, EventType } from "@/types/api";
+import type { Events } from "@/types/api";
 import { Paperclip, Send, AtSign, Globe, Layers } from "lucide-react";
-import { useAuth } from "@/hooks/use-user";
 
 export const loader =
   (queryClient: QueryClient) =>
@@ -49,10 +48,8 @@ export const ChatMessages = () => {
     ReturnType<ReturnType<typeof loader>>
   >;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const auth = useAuth();
   const queryClient = useQueryClient();
   const [event, setEvent] = useState<Events | "idle">("idle");
-  const [eventType, setEventType] = useState<EventType | undefined>(undefined);
   const [tokenStream, setTokenStream] = useState("");
   const [newMessages, setNewMessages] = useState<ChatMessageProp[]>([]);
 
@@ -80,7 +77,6 @@ export const ChatMessages = () => {
     setNewMessages([]);
     setTokenStream("");
     setEvent("idle");
-    setEventType(undefined);
   }, [sessionId, isRefetching]);
 
   // Auto-scroll on new message or token stream
@@ -99,7 +95,6 @@ export const ChatMessages = () => {
 
       if (parsedLastMessage.event) {
         setEvent(parsedLastMessage.event);
-        setEventType(type);
       }
 
       // Handle token streaming for agent responses
@@ -112,7 +107,6 @@ export const ChatMessages = () => {
         // Clear the streaming state
         setTokenStream("");
         setEvent("idle");
-        setEventType(undefined);
 
         // Clear new messages since they'll be fetched from server
         setNewMessages([]);
@@ -128,12 +122,10 @@ export const ChatMessages = () => {
   }, [lastMessage, accountId, sessionId, queryClient]);
 
   // Send message to websocket
-  const handleSendMessage = (data: ChatInputType, formMethods: any) => {
+  const handleSendMessage = (data: ChatInputType) => {
     const messageContent = data.content?.trim();
 
     if (!messageContent) return;
-
-    console.log("handleSendMessage called with:", { data, formMethods });
 
     // Add user message to new messages immediately for immediate UI feedback
     const userMessage = {
@@ -146,7 +138,6 @@ export const ChatMessages = () => {
 
     // Set processing state
     setEvent("processing_session");
-    setEventType(undefined);
     setTokenStream("");
 
     // Send message via websocket
@@ -160,30 +151,12 @@ export const ChatMessages = () => {
       })
     );
 
-    // Clear the form immediately - try multiple approaches
-    console.log("Attempting to clear form...");
-    try {
-      if (formMethods?.setValue) {
-        console.log("Using formMethods.setValue");
-        formMethods.setValue("content", "");
-      }
-      if (formMethods?.reset) {
-        console.log("Using formMethods.reset");
-        formMethods.reset({ content: "" });
-      }
-    } catch (error) {
-      console.log("Form methods not available:", error);
-    }
-
-    // Also directly clear the textarea as a fallback
+    // Clear the textarea directly
     setTimeout(() => {
-      console.log("Direct DOM manipulation fallback");
       const textarea = document.querySelector(
         'textarea[name="content"]'
       ) as HTMLTextAreaElement;
-      console.log("Found textarea:", textarea);
       if (textarea) {
-        console.log("Clearing textarea value and height");
         textarea.value = "";
         textarea.style.height = "auto";
         // Trigger input event to update React state
@@ -208,11 +181,7 @@ export const ChatMessages = () => {
                 content={msg.content}
               />
             ))}
-          <ChatMessageStream
-            event={event}
-            eventType={eventType}
-            tokenStream={tokenStream}
-          />
+          <ChatMessageStream event={event} tokenStream={tokenStream} />
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -229,7 +198,7 @@ export const ChatMessages = () => {
               },
             }}
           >
-            {({ control, reset, setValue }) => (
+            {({ control }) => (
               <div className="relative">
                 <FormField
                   control={control}
@@ -319,23 +288,6 @@ export const ChatMessages = () => {
                                   event === "agent_response"
                                 }
                                 className="h-8 w-8 rounded-lg bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 p-0"
-                                onClick={() => {
-                                  console.log("Submit button clicked!");
-                                  // Clear form after submission
-                                  setTimeout(() => {
-                                    console.log(
-                                      "Button onClick timeout - clearing form"
-                                    );
-                                    setValue("content", "");
-                                    reset({ content: "" });
-                                    // Also reset textarea height
-                                    const textarea =
-                                      document.querySelector("textarea");
-                                    if (textarea) {
-                                      textarea.style.height = "auto";
-                                    }
-                                  }, 0);
-                                }}
                               >
                                 <Send size={16} className="text-white" />
                                 <span className="sr-only">Send message</span>
