@@ -1,4 +1,3 @@
-import React from "react";
 import { ChevronDown } from "lucide-react";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import journeyAILogoFull from "@/assets/logo/JourneyAI-Logo-Full.svg";
