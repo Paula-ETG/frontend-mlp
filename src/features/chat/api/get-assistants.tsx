@@ -4,24 +4,45 @@ import { api } from "@/libs/axios";
 import { type QueryConfig } from "@/libs/react-query";
 import type { Assistant } from "@/types/api";
 
-export const getAssistants = (): Promise<Assistant[]> => {
-  return api.get(`/assistant`);
+type GetAssistantsParams = {
+  category?: string;
 };
 
-export const getAssistantsQueryOptions = () => {
+export const getAssistants = async (
+  params?: GetAssistantsParams
+): Promise<Assistant[]> => {
+  // Add intentional 0.8 second delay to show loading animation
+  await new Promise((resolve) => setTimeout(resolve, 800));
+
+  const queryParams = new URLSearchParams();
+  if (params?.category) {
+    queryParams.append("category", params.category);
+  }
+
+  const url = `/assistant${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  return api.get(url);
+};
+
+export const getAssistantsQueryOptions = (params?: GetAssistantsParams) => {
   return queryOptions({
-    queryKey: ["assistants"],
-    queryFn: () => getAssistants(),
+    queryKey: ["assistants", params?.category || "all"],
+    queryFn: () => getAssistants(params),
   });
 };
 
 type UseAssistantsOptions = {
+  queryParams?: GetAssistantsParams;
   queryConfig?: QueryConfig<typeof getAssistantsQueryOptions>;
 };
 
-export const useAssistants = ({ queryConfig }: UseAssistantsOptions) => {
+export const useAssistants = ({
+  queryParams,
+  queryConfig,
+}: UseAssistantsOptions = {}) => {
   return useQuery({
-    ...getAssistantsQueryOptions(),
+    ...getAssistantsQueryOptions(queryParams),
     ...queryConfig,
   });
 };
