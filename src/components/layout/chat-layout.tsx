@@ -196,15 +196,110 @@ export const ChatSidebarSessionsGroupContent = ({
 };
 
 const Header = () => {
+  const [selectedModel, setSelectedModel] = useState("gpt-4.1");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const modelOptions = [
+    {
+      value: "gpt-4.1",
+      label: "GPT-4.1",
+      description: "Most capable model, best for complex tasks",
+      badge: "POPULAR",
+    },
+    {
+      value: "gpt-4o",
+      label: "GPT-4o",
+      description: "Fastest model, optimized for speed",
+      badge: "FAST",
+    },
+    {
+      value: "o3-mini",
+      label: "o3-mini",
+      description: "Advanced reasoning capabilities",
+      badge: "REASONING",
+    },
+  ];
+
+  const handleModelSelect = (modelValue: string) => {
+    setSelectedModel(modelValue);
+    setIsOpen(false);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+  };
+
   return (
-    <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 px-4 z-50 bg-gray-50">
+    <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 px-4 z-40 bg-gray-50">
       <SidebarTrigger />
       <div>
-        <DropdownMenu>
+        <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger asChild>
-            <GptModelSelectButton />
+            <div>
+              <GptModelSelectButton selectedModel={selectedModel} />
+            </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="dropdown-content-width-full"></DropdownMenuContent>
+          <DropdownMenuContent
+            className="min-w-[280px] z-[100] bg-white border border-gray-200 shadow-xl rounded-lg p-2"
+            align="start"
+            sideOffset={12}
+          >
+            <div className="px-3 py-2 border-b border-gray-100 mb-1">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Select Model
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Choose the AI model for your conversations
+              </p>
+            </div>
+            <DropdownMenuGroup>
+              {modelOptions.map((model) => (
+                <DropdownMenuItem
+                  key={model.value}
+                  className="relative px-3 py-3 cursor-grab hover:cursor-grab focus:cursor-grab rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150"
+                  onClick={() => handleModelSelect(model.value)}
+                >
+                  <div className="flex items-start justify-between w-full">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-gray-900 text-sm">
+                          {model.label}
+                        </span>
+                        {model.badge && (
+                          <span
+                            className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                              model.badge === "POPULAR"
+                                ? "bg-blue-100 text-blue-700"
+                                : model.badge === "FAST"
+                                ? "bg-green-100 text-green-700"
+                                : model.badge === "REASONING"
+                                ? "bg-purple-100 text-purple-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {model.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        {model.description}
+                      </p>
+                    </div>
+                    {selectedModel === model.value && (
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 ml-3 flex-shrink-0">
+                        <span className="text-white text-xs font-bold">✓</span>
+                      </div>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+            <div className="px-3 py-2 border-t border-gray-100 mt-1">
+              <p className="text-xs text-gray-400">
+                💡 Model affects response quality and speed
+              </p>
+            </div>
+          </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </header>
