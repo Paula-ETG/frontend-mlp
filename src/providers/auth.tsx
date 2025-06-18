@@ -5,16 +5,6 @@ import { useUser } from "@/libs/auth";
 import type { AuthTokens } from "@/types/api";
 import type { User } from "@/types/models";
 
-// type AuthUserContext = {
-//   user: User | undefined;
-//   setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
-//   token: string | null;
-//   apiKey: string | null;
-//   setToken: (token: string | null, apiKey: string | null) => void;
-//   logout: () => void;
-//   isAuthenticated: boolean;
-// };
-
 type AuthUserContext = {
   user: User | null;
   accessToken: string | null;
@@ -31,67 +21,16 @@ export const AuthContext = createContext<AuthUserContext | undefined>(
   undefined
 );
 
-// export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-//   const [accessToken, setAccessToken] = useState<string | null>(null);
-
-//   const handleSetAccessToken = (token: string | null) => {
-//     setAccessToken(token);
-//   };
-
-//   const handleSetApiKey = (apiKey: string | null) => {
-//     setApiKey(apiKey);
-//   };
-
-//   // Load token from localStorage on mount
-//   useEffect(() => {
-//     const savedToken = localStorage.getItem(TOKEN_KEY);
-//     const savedApiKey = localStorage.getItem(API_KEY);
-//     if (savedToken && savedApiKey) {
-//       setTokenState(savedToken);
-//       setApiKey(savedApiKey);
-//     }
-//   }, []);
-
-//   const setToken = (newToken: string | null, apiKey: string | null) => {
-//     if (newToken && apiKey) {
-//       localStorage.setItem(TOKEN_KEY, newToken);
-//       localStorage.setItem(API_KEY, apiKey);
-//     } else {
-//       localStorage.removeItem(TOKEN_KEY);
-//       localStorage.removeItem(API_KEY);
-//     }
-//     setTokenState(newToken);
-//   };
-
-//   const logout = () => {
-//     setUser(undefined);
-//     setToken(null, null);
-//   };
-
-//   const authValues = useMemo(
-//     () => ({
-//       user,
-//       setUser,
-//       token,
-//       apiKey,
-//       setToken,
-//       logout,
-//       isAuthenticated: !!user && !!token,
-//     }),
-//     [user, token]
-//   );
-
-//   return (
-//     <AuthContext.Provider value={authValues}>{children}</AuthContext.Provider>
-//   );
-// };
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() =>
+    localStorage.getItem(ACCESS_TOKEN_KEY)
+  );
+  const [apiKey, setApiKey] = useState<string | null>(() =>
+    localStorage.getItem(API_KEY)
+  );
   const [authState, setAuthState] = useState<
     "loading" | "authenticated" | "unauthenticated"
   >("loading");
@@ -122,47 +61,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(user);
   };
 
-  // hydrate the access token from local storage and refetch the user
+  // invalidate user query if we have tokens on mount
   useEffect(() => {
-    const savedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const savedApiKey = localStorage.getItem(API_KEY);
-    if (savedAccessToken && savedApiKey) {
-      handleSetAuthTokens({
-        access_token: savedAccessToken,
-        api_key: savedApiKey,
-      });
+    if (accessToken && apiKey) {
       queryClient.invalidateQueries({ queryKey: ["user"] });
     }
   }, []);
 
   // set auth state based on the status of the user query and tokens
   useEffect(() => {
-    // No tokens → "unauthenticated"
+    // If no tokens, set unauthenticated
     if (!accessToken || !apiKey) {
       setAuthState("unauthenticated");
-    } else {
-      // Tokens exist + query pending → "loading"
-      if (status === "pending") {
-        setAuthState("loading");
-      } else if (status === "success") {
-        // Tokens exist + query success with data → "authenticated"
-        if (data) {
-          setUser(data);
-          setAuthState("authenticated");
-          // Tokens exist + query success with no data → "unauthenticated"
-        } else {
-          setAuthState("unauthenticated");
-        }
-        // Tokens exist + query error → "unauthenticated"
+      return;
+    }
+
+    // If we have tokens, check query status
+    if (status === "pending") {
+      setAuthState("loading");
+    } else if (status === "success") {
+      if (data) {
+        setUser(data);
+        setAuthState("authenticated");
       } else {
         setAuthState("unauthenticated");
       }
+    } else if (status === "error") {
+      setAuthState("unauthenticated");
     }
   }, [status, accessToken, apiKey, data]);
 
   const logout = () => {
     setUser(null);
     handleSetAuthTokens(null);
+    handleSaveAuthTokens(null);
   };
 
   const authValues = useMemo(
