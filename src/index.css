@@ -158,6 +158,21 @@
     width: var(--radix-dropdown-menu-trigger-width);
     max-height: var(--radix-dropdown-menu-content-available-height);
   }
+
+  /* Hide scrollbar for webkit browsers (Chrome, Safari, Edge) */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for Firefox */
+  .hide-scrollbar {
+    scrollbar-width: none;
+  }
+
+  /* Hide scrollbar for IE and Edge */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+  }
 }
 
 /* Chat streaming cursor animation */
